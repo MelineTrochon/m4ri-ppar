@@ -46,7 +46,7 @@ static void init(void)
   long long tb1; long long us1;
 
   f = fopen("/proc/cpuinfo","r");
-  if (!f) return 0;
+  if (!f) return;
 
   for (;;) {
     s = fscanf(f," clock : %lf MHz",&cpufrequency);

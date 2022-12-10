@@ -18,7 +18,7 @@ long long cpuend;
 
 long long t[1001];
 
-main()
+int main()
 {
   int i;
 

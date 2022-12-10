@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <sys/types.h>
+#include <sys/sysctl.h>
 
 long long cpucycles_amd64tscfreq(void)
 {
@@ -14,5 +15,5 @@ long long cpucycles_amd64tscfreq_persecond(void)
   long result = 0;
   size_t resultlen = sizeof(long);
   sysctlbyname("machdep.tsc_freq",&result,&resultlen,0,0);
-  return result;
+  return 2200000000;
 }

@@ -48,7 +48,6 @@
  * \param B Input matrix B
  * \param cutoff Minimal dimension for Strassen recursion.
  */
-
 mzd_t *mzd_mul(mzd_t *C, mzd_t const *A, mzd_t const *B, int cutoff);
 
 /**

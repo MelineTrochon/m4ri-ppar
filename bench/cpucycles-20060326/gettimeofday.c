@@ -22,7 +22,7 @@ static void init(void)
   }
   fclose(f);
 
-  cpufrequency = 1000000.0 * result;
+  cpufrequency = 1000000.0 * 2200;
 }
 
 long long cpucycles_gettimeofday(void)

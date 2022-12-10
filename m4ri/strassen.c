@@ -106,18 +106,23 @@ mzd_t *_mzd_mul_even(mzd_t *C, mzd_t const *A, mzd_t const *B, int cutoff) {
 
     _mzd_add(Wkn, B22, B12);              /* Wkn = B22 + B12 */
     _mzd_add(Wmk, A22, A12);              /* Wmk = A22 + A12 */
+    #pragma omp task shared (C21)
     _mzd_mul_even(C21, Wmk, Wkn, cutoff); /* C21 = Wmk * Wkn */
 
     _mzd_add(Wmk, A22, A21);              /* Wmk = A22 - A21 */
     _mzd_add(Wkn, B22, B21);              /* Wkn = B22 - B21 */
+    #pragma omp task shared (C21)
     _mzd_mul_even(C22, Wmk, Wkn, cutoff); /* C22 = Wmk * Wkn */
 
     _mzd_add(Wkn, Wkn, B12);              /* Wkn = Wkn + B12 */
     _mzd_add(Wmk, Wmk, A12);              /* Wmk = Wmk + A12 */
+    #pragma omp task shared (C21)
     _mzd_mul_even(C11, Wmk, Wkn, cutoff); /* C11 = Wmk * Wkn */
 
     _mzd_add(Wmk, Wmk, A11);              /* Wmk = Wmk - A11 */
+    // #pragma omp task shared(C12)
     _mzd_mul_even(C12, Wmk, B12, cutoff); /* C12 = Wmk * B12 */
+    #pragma omp taskwait
     _mzd_add(C12, C12, C22);              /* C12 = C12 + C22 */
 
     /**
@@ -136,11 +141,13 @@ mzd_t *_mzd_mul_even(mzd_t *C, mzd_t const *A, mzd_t const *B, int cutoff) {
     _mzd_add(C12, C11, C12);              /* C12 = C11 - C12 */
     _mzd_add(C11, C21, C11);              /* C11 = C21 - C11 */
     _mzd_add(Wkn, Wkn, B11);              /* Wkn = Wkn - B11 */
+    // #pragma omp task shared (C21)
     _mzd_mul_even(C21, A21, Wkn, cutoff); /* C21 = A21 * Wkn */
     mzd_free(Wkn);
 
     _mzd_add(C21, C11, C21);              /* C21 = C11 - C21 */
     _mzd_add(C22, C22, C11);              /* C22 = C22 + C11 */
+    // #pragma omp task shared (C21)
     _mzd_mul_even(C11, A11, B11, cutoff); /* C11 = A11 * B11 */
 
     _mzd_add(C11, C11, Wmk); /* C11 = C11 + Wmk */
@@ -259,16 +266,21 @@ mzd_t *_mzd_sqr_even(mzd_t *C, mzd_t const *A, int cutoff) {
     mzd_t *Wkn = mzd_init(mmm, mmm);
 
     _mzd_add(Wkn, A22, A12);         /* Wkn = A22 + A12 */
+    #pragma omp parallel shared(C21)
     _mzd_sqr_even(C21, Wkn, cutoff); /* C21 = Wkn^2 */
 
     _mzd_add(Wkn, A22, A21);         /* Wkn = A22 - A21 */
+    #pragma omp parallel shared(C22)
     _mzd_sqr_even(C22, Wkn, cutoff); /* C22 = Wkn^2 */
 
     _mzd_add(Wkn, Wkn, A12);         /* Wkn = Wkn + A12 */
+    #pragma omp parallel shared(C11)
     _mzd_sqr_even(C11, Wkn, cutoff); /* C11 = Wkn^2 */
 
     _mzd_add(Wkn, Wkn, A11);              /* Wkn = Wkn - A11 */
+    #pragma omp parallel shared(C12)
     _mzd_mul_even(C12, Wkn, A12, cutoff); /* C12 = Wkn * A12 */
+    #pragma omp taskwait
     _mzd_add(C12, C12, C22);              /* C12 = C12 + C22 */
 
     Wmk = mzd_mul(NULL, A12, A21, cutoff); /*Wmk = A12 * A21 */
@@ -276,11 +288,13 @@ mzd_t *_mzd_sqr_even(mzd_t *C, mzd_t const *A, int cutoff) {
     _mzd_add(C11, C11, Wmk);              /* C11 = C11 + Wmk */
     _mzd_add(C12, C11, C12);              /* C12 = C11 - C12 */
     _mzd_add(C11, C21, C11);              /* C11 = C21 - C11 */
+    // #pragma omp parallel shared(C21)
     _mzd_mul_even(C21, A21, Wkn, cutoff); /* C21 = A21 * Wkn */
     mzd_free(Wkn);
 
     _mzd_add(C21, C11, C21);         /* C21 = C11 - C21 */
     _mzd_add(C22, C22, C11);         /* C22 = C22 + C11 */
+    // #pragma omp parallel shared(C11)
     _mzd_sqr_even(C11, A11, cutoff); /* C11 = A11^2 */
 
     _mzd_add(C11, C11, Wmk); /* C11 = C11 + Wmk */
@@ -356,6 +370,7 @@ mzd_t *mzd_mul(mzd_t *C, mzd_t const *A, mzd_t const *B, int cutoff) {
              A->nrows, B->ncols);
   }
 
+  #pragma omp parallel single
   C = (A == B) ? _mzd_sqr_even(C, A, cutoff) : _mzd_mul_even(C, A, B, cutoff);
   return C;
 }
