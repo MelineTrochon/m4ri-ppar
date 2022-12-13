@@ -1,6 +1,6 @@
 #! /bin/sh
 # Generated automatically by config.status (m4ri) 20200125
-# Libtool was configured on host Melines-MacBook-Pro.local:
+# Libtool was configured on host melines-mbp.home:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 
 # Provide generalized library-building support services.

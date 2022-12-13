@@ -34,7 +34,6 @@
  *
  * \note This function also works when dst == src.
  */
-
 static inline void _mzd_copy_transpose_64x64(word *dst, word const *src, wi_t rowstride_dst,
                                              wi_t rowstride_src) {
   /*
@@ -112,7 +111,6 @@ static inline void _mzd_copy_transpose_64x64(word *dst, word const *src, wi_t ro
  *
  * \note This function also works to transpose in-place.
  */
-
 static inline void _mzd_copy_transpose_64x64_2(word *RESTRICT dst1, word *RESTRICT dst2,
                                                word const *RESTRICT src1, word const *RESTRICT src2,
                                                wi_t rowstride_dst, wi_t rowstride_src) {
@@ -256,7 +254,6 @@ static inline int _mzd_transpose_Nxjx64(word *RESTRICT t, int n) {
  *
  * \note This function also works to transpose in-place.
  */
-
 static inline void _mzd_copy_transpose_lt64x64(word *RESTRICT dst, word const *RESTRICT src,
                                                wi_t rowstride_dst, wi_t rowstride_src, int n) {
   // Preload the n input rows into level 1, using a minimum of cache lines (compact storage).
@@ -389,7 +386,6 @@ static inline void _mzd_copy_transpose_lt64x64(word *RESTRICT dst, word const *R
  *
  * \note This function also works to transpose in-place.
  */
-
 static inline void _mzd_copy_transpose_64xlt64(word *RESTRICT dst, word const *RESTRICT src,
                                                wi_t rowstride_dst, wi_t rowstride_src, int n) {
   word t[64];
@@ -504,7 +500,6 @@ static inline void _mzd_copy_transpose_64xlt64(word *RESTRICT dst, word const *R
  *
  * \note This function also works to transpose in-place.
  */
-
 static inline void _mzd_copy_transpose_le8xle8(word *RESTRICT dst, word const *RESTRICT src,
                                                wi_t rowstride_dst, wi_t rowstride_src, int n, int m,
                                                int maxsize) {
@@ -552,7 +547,6 @@ static inline void _mzd_copy_transpose_le8xle8(word *RESTRICT dst, word const *R
  *
  * \note This function also works to transpose in-place.
  */
-
 static inline void _mzd_copy_transpose_le16xle16(word *RESTRICT dst, word const *RESTRICT src,
                                                  wi_t rowstride_dst, wi_t rowstride_src, int n,
                                                  int m, int maxsize) {
@@ -655,7 +649,6 @@ static inline void _mzd_copy_transpose_le16xle16(word *RESTRICT dst, word const 
  *
  * \note This function also works to transpose in-place.
  */
-
 static inline void _mzd_copy_transpose_le32xle32(word *RESTRICT dst, word const *RESTRICT src,
                                                  wi_t rowstride_dst, wi_t rowstride_src, int n,
                                                  int m) {
