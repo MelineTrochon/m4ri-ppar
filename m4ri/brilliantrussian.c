@@ -1074,11 +1074,18 @@ mzd_t *_mzd_mul_m4rm(mzd_t *C, mzd_t const *A, mzd_t const *B, int k, int clear)
 
   for (rci_t giantstep = 0; giantstep < a_nr; giantstep += blocksize) {
     for (rci_t i = 0; i < end; ++i) {
+      #if __M4RI_HAVE_OPENMP
+      #pragma omp parallel for schedule(static, 1)
+      #endif
       for (int z = 0; z < __M4RI_M4RM_NTABLES; z++) {
         mzd_make_table(B, kk * i + k * z, 0, k, T[z], L[z]);
       }
 
       const rci_t blockend = MIN(giantstep + blocksize, a_nr);
+
+      #if __M4RI_HAVE_OPENMP
+      #pragma omp parallel for schedule(static, 1)
+      #endif
       for (rci_t j = giantstep; j < blockend; j++) {
         const word a = mzd_read_bits(A, j, kk * i, kk);
 
@@ -1114,6 +1121,9 @@ mzd_t *_mzd_mul_m4rm(mzd_t *C, mzd_t const *A, mzd_t const *B, int k, int clear)
   /* handle stuff that doesn't fit into multiple of kk */
   if (a_nc % kk) {
     rci_t i;
+    #if __M4RI_HAVE_OPENMP
+    #pragma omp parallel for schedule(static, 1)
+    #endif
     for (i = kk / k * end; i < a_nc / k; ++i) {
       mzd_make_table(B, k * i, 0, k, T[0], L[0]);
       for (rci_t j = 0; j < a_nr; ++j) {
@@ -1135,6 +1145,9 @@ mzd_t *_mzd_mul_m4rm(mzd_t *C, mzd_t const *A, mzd_t const *B, int k, int clear)
     }
   }
 
+  #if __M4RI_HAVE_OPENMP
+  #pragma omp parallel for schedule(static, 1)
+  #endif
   for (int j = 0; j < __M4RI_M4RM_NTABLES; j++) {
     mzd_free(T[j]);
   }

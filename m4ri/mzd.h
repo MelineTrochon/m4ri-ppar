@@ -177,7 +177,6 @@ static inline int mzd_is_dangerous_window(mzd_t const *M) {
  *
  * \return pointer to first word of the row.
  */
-
 static inline word *mzd_row(mzd_t *M, rci_t row) {
   return M->data + M->rowstride * row;
 }
@@ -304,7 +303,6 @@ static inline void mzd_row_swap(mzd_t *M, rci_t const rowa, rci_t const rowb) {
  * \param A Source matrix.
  * \param j Source row index.
  */
-
 void mzd_copy_row(mzd_t *B, rci_t i, mzd_t const *A, rci_t j);
 
 
@@ -317,7 +315,6 @@ void mzd_copy_row(mzd_t *B, rci_t i, mzd_t const *A, rci_t j);
  * \param start_row Row index.
  * \param stop_row Row index (exclusive).
  */
-
 static inline void mzd_col_swap_in_rows(mzd_t *M, rci_t const cola, rci_t const colb,
                                         rci_t const start_row, rci_t const stop_row) {
   if (cola == colb) { return; }
@@ -432,7 +429,6 @@ static inline void mzd_col_swap(mzd_t *M, rci_t const cola, rci_t const colb) {
  * \note No bounds checks whatsoever are performed.
  *
  */
-
 static inline BIT mzd_read_bit(mzd_t const *M, rci_t const row, rci_t const col) {
   word const * truerow = mzd_row_const(M, row);
   return __M4RI_GET_BIT(truerow[col / m4ri_radix], col % m4ri_radix);
@@ -449,7 +445,6 @@ static inline BIT mzd_read_bit(mzd_t const *M, rci_t const row, rci_t const col)
  * \note No bounds checks whatsoever are performed.
  *
  */
-
 static inline void mzd_write_bit(mzd_t *M, rci_t const row, rci_t const col, BIT const value) {
     word * truerow = mzd_row(M, row);
   __M4RI_WRITE_BIT(truerow[col / m4ri_radix], col % m4ri_radix, value);
@@ -464,7 +459,6 @@ static inline void mzd_write_bit(mzd_t *M, rci_t const row, rci_t const col, BIT
  * \param n Number of bits (<= m4ri_radix);
  * \param values Word with values;
  */
-
 static inline void mzd_xor_bits(mzd_t *M, rci_t const x, rci_t const y, int const n,
                                 word values) {
   int const spot   = y % m4ri_radix;
@@ -484,7 +478,6 @@ static inline void mzd_xor_bits(mzd_t *M, rci_t const x, rci_t const y, int cons
  * \param n Number of bits (<= m4ri_radix);
  * \param values Word with values;
  */
-
 static inline void mzd_and_bits(mzd_t *M, rci_t const x, rci_t const y, int const n,
                                 word values) {
   /* This is the best way, since this will drop out once we inverse the bits in values: */
@@ -506,7 +499,6 @@ static inline void mzd_and_bits(mzd_t *M, rci_t const x, rci_t const y, int cons
  * \param y Starting column.
  * \param n Number of bits (0 < n <= m4ri_radix);
  */
-
 static inline void mzd_clear_bits(mzd_t *M, rci_t const x, rci_t const y, int const n) {
   assert(n > 0 && n <= m4ri_radix);
   word values      = m4ri_ffff >> (m4ri_radix - n);
@@ -529,7 +521,6 @@ static inline void mzd_clear_bits(mzd_t *M, rci_t const x, rci_t const y, int co
  *
  * \warning This function expects that there is at least one word worth of work.
  */
-
 static inline void mzd_row_add_offset(mzd_t *M, rci_t dstrow, rci_t srcrow, rci_t coloffset) {
   assert(dstrow < M->nrows && srcrow < M->nrows && coloffset < M->ncols);
   wi_t const startblock = coloffset / m4ri_radix;
@@ -566,7 +557,6 @@ static inline void mzd_row_add_offset(mzd_t *M, rci_t dstrow, rci_t srcrow, rci_
  *
  * \note this can be done much faster with mzd_combine.
  */
-
 void mzd_row_add(mzd_t *M, rci_t const sourcerow, rci_t const destrow);
 
 /**
@@ -598,7 +588,6 @@ mzd_t *mzd_mul_naive(mzd_t *C, mzd_t const *A, mzd_t const *B);
  * smarter to calculate bT yourself, and keep it, and then use the
  * function called _mzd_mul_naive
  */
-
 mzd_t *mzd_addmul_naive(mzd_t *C, mzd_t const *A, mzd_t const *B);
 
 /**
@@ -611,7 +600,6 @@ mzd_t *mzd_addmul_naive(mzd_t *C, mzd_t const *A, mzd_t const *B);
  * \param B Pre-transposed input matrix B.
  * \param clear Whether to clear C before accumulating AB
  */
-
 mzd_t *_mzd_mul_naive(mzd_t *C, mzd_t const *A, mzd_t const *B, int const clear);
 
 /**
@@ -630,7 +618,6 @@ mzd_t *_mzd_mul_va(mzd_t *C, mzd_t const *v, mzd_t const *A, int const clear);
  *
  * \param M Matrix
  */
-
 void mzd_randomize(mzd_t *M);
 
 /**
@@ -665,7 +652,6 @@ void mzd_randomize_custom(mzd_t *M, m4ri_random_callback rc, void *data);
  * \param M Matrix
  * \param value Either 0 or 1
  */
-
 void mzd_set_ui(mzd_t *M, unsigned int const value);
 
 /**
@@ -680,7 +666,6 @@ void mzd_set_ui(mzd_t *M, unsigned int const value);
  * \param startcol First column to consider for reduction.
  * \param full Gauss-Jordan style or upper triangular form only.
  */
-
 rci_t mzd_gauss_delayed(mzd_t *M, rci_t const startcol, int const full);
 
 /**
@@ -695,7 +680,6 @@ rci_t mzd_gauss_delayed(mzd_t *M, rci_t const startcol, int const full);
  *
  * \sa mzd_echelonize_m4ri(), mzd_echelonize_pluq()
  */
-
 rci_t mzd_echelonize_naive(mzd_t *M, int const full);
 
 /**
@@ -704,7 +688,6 @@ rci_t mzd_echelonize_naive(mzd_t *M, int const full);
  * \param A Matrix
  * \param B Matrix
  */
-
 int mzd_equal(mzd_t const *A, mzd_t const *B);
 
 /**
@@ -717,7 +700,6 @@ int mzd_equal(mzd_t const *A, mzd_t const *B);
  * relatively arbitrary since elements of GF(2) don't have an
  * ordering.
  */
-
 int mzd_cmp(mzd_t const *A, mzd_t const *B);
 
 /**
@@ -726,7 +708,6 @@ int mzd_cmp(mzd_t const *A, mzd_t const *B);
  * \param DST May be NULL for automatic creation.
  * \param A Source matrix.
  */
-
 mzd_t *mzd_copy(mzd_t *DST, mzd_t const *A);
 
 /**
@@ -746,7 +727,6 @@ mzd_t *mzd_copy(mzd_t *DST, mzd_t const *A);
  *
  * \note This is sometimes called augment.
  */
-
 mzd_t *mzd_concat(mzd_t *C, mzd_t const *A, mzd_t const *B);
 
 /**
@@ -765,7 +745,6 @@ mzd_t *mzd_concat(mzd_t *C, mzd_t const *A, mzd_t const *B);
  * \param A Matrix
  * \param B Matrix
  */
-
 mzd_t *mzd_stack(mzd_t *C, mzd_t const *A, mzd_t const *B);
 
 /**
@@ -793,7 +772,6 @@ mzd_t *mzd_submatrix(mzd_t *S, mzd_t const *M, rci_t const lowr, rci_t const low
  * \param A Matrix to be reduced.
  * \param I Identity matrix.
  */
-
 mzd_t *mzd_invert_naive(mzd_t *INV, mzd_t const *A, mzd_t const *I);
 
 /**
@@ -806,7 +784,6 @@ mzd_t *mzd_invert_naive(mzd_t *INV, mzd_t const *A, mzd_t const *I);
  * \param A Matrix
  * \param B Matrix
  */
-
 mzd_t *mzd_add(mzd_t *C, mzd_t const *A, mzd_t const *B);
 
 /**
@@ -816,7 +793,6 @@ mzd_t *mzd_add(mzd_t *C, mzd_t const *A, mzd_t const *B);
  * \param A Matrix
  * \param B Matrix
  */
-
 mzd_t *_mzd_add(mzd_t *C, mzd_t const *A, mzd_t const *B);
 
 /**
@@ -826,7 +802,6 @@ mzd_t *_mzd_add(mzd_t *C, mzd_t const *A, mzd_t const *B);
  * \param A Matrix
  * \param B Matrix
  */
-
 #define mzd_sub mzd_add
 
 /**
