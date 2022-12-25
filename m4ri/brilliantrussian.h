@@ -313,6 +313,7 @@ mzd_t *mzd_addmul_m4rm(mzd_t *C, mzd_t const *A, mzd_t const *B, int k);
  *
  * \return Pointer to C.
  */
+
 mzd_t *_mzd_mul_m4rm(mzd_t *C, mzd_t const *A, mzd_t const *B, int k, int clear);
 
 #endif  // M4RI_BRILLIANTRUSSIAN_H

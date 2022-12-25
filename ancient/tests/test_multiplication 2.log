@@ -1,0 +1,5 @@
+   mul: m:    1, l:    1, n:    1, k:  0, cutoff: 1024 ... passed
+   mul: m:    1, l:  128, n:  128, k:  0, cutoff:    0 ... passed
+   mul: m:    3, l:  131, n:  257, k:  0, cutoff:    0 ... passed
+   mul: m:   64, l:   64, n:   64, k:  0, cutoff:   64 Strassen != M4RM M4RM != Naiv Strassen != Naiv ... FAILED
+   mul: m:  128, l:  128, n:  128, k:  0, cutoff:   64FAIL test_multiplication (exit status: 134)

@@ -156,8 +156,8 @@ am_libm4ri_la_OBJECTS = m4ri/brilliantrussian.lo m4ri/misc.lo \
 	m4ri/mzd.lo m4ri/transpose.lo m4ri/graycode.lo \
 	m4ri/strassen.lo m4ri/mzp.lo m4ri/triangular.lo \
 	m4ri/triangular_russian.lo m4ri/ple.lo m4ri/ple_russian.lo \
-	m4ri/solve.lo m4ri/echelonform.lo m4ri/mmc.lo \
-	m4ri/debug_dump.lo m4ri/io.lo m4ri/djb.lo
+	m4ri/solve.lo m4ri/echelonform.lo m4ri/debug_dump.lo \
+	m4ri/io.lo m4ri/djb.lo
 libm4ri_la_OBJECTS = $(am_libm4ri_la_OBJECTS)
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
@@ -185,11 +185,10 @@ am__depfiles_remade = m4ri/$(DEPDIR)/brilliantrussian.Plo \
 	m4ri/$(DEPDIR)/debug_dump.Plo m4ri/$(DEPDIR)/djb.Plo \
 	m4ri/$(DEPDIR)/echelonform.Plo m4ri/$(DEPDIR)/graycode.Plo \
 	m4ri/$(DEPDIR)/io.Plo m4ri/$(DEPDIR)/misc.Plo \
-	m4ri/$(DEPDIR)/mmc.Plo m4ri/$(DEPDIR)/mzd.Plo \
-	m4ri/$(DEPDIR)/mzp.Plo m4ri/$(DEPDIR)/ple.Plo \
-	m4ri/$(DEPDIR)/ple_russian.Plo m4ri/$(DEPDIR)/solve.Plo \
-	m4ri/$(DEPDIR)/strassen.Plo m4ri/$(DEPDIR)/transpose.Plo \
-	m4ri/$(DEPDIR)/triangular.Plo \
+	m4ri/$(DEPDIR)/mzd.Plo m4ri/$(DEPDIR)/mzp.Plo \
+	m4ri/$(DEPDIR)/ple.Plo m4ri/$(DEPDIR)/ple_russian.Plo \
+	m4ri/$(DEPDIR)/solve.Plo m4ri/$(DEPDIR)/strassen.Plo \
+	m4ri/$(DEPDIR)/transpose.Plo m4ri/$(DEPDIR)/triangular.Plo \
 	m4ri/$(DEPDIR)/triangular_russian.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
@@ -469,7 +468,6 @@ libm4ri_la_SOURCES = \
 	m4ri/ple_russian.c \
 	m4ri/solve.c \
 	m4ri/echelonform.c \
-	m4ri/mmc.c \
 	m4ri/debug_dump.c \
 	m4ri/io.c \
 	m4ri/djb.c
@@ -494,7 +492,6 @@ pkgincludesub_HEADERS = m4ri/m4ri.h \
 	m4ri/echelonform.h \
 	m4ri/xor.h \
 	m4ri/xor_template.h \
-	m4ri/mmc.h \
 	m4ri/debug_dump.h \
 	m4ri/io.h \
 	m4ri/djb.h
@@ -623,7 +620,6 @@ m4ri/ple_russian.lo: m4ri/$(am__dirstamp) \
 m4ri/solve.lo: m4ri/$(am__dirstamp) m4ri/$(DEPDIR)/$(am__dirstamp)
 m4ri/echelonform.lo: m4ri/$(am__dirstamp) \
 	m4ri/$(DEPDIR)/$(am__dirstamp)
-m4ri/mmc.lo: m4ri/$(am__dirstamp) m4ri/$(DEPDIR)/$(am__dirstamp)
 m4ri/debug_dump.lo: m4ri/$(am__dirstamp) \
 	m4ri/$(DEPDIR)/$(am__dirstamp)
 m4ri/io.lo: m4ri/$(am__dirstamp) m4ri/$(DEPDIR)/$(am__dirstamp)
@@ -647,7 +643,6 @@ include m4ri/$(DEPDIR)/echelonform.Plo # am--include-marker
 include m4ri/$(DEPDIR)/graycode.Plo # am--include-marker
 include m4ri/$(DEPDIR)/io.Plo # am--include-marker
 include m4ri/$(DEPDIR)/misc.Plo # am--include-marker
-include m4ri/$(DEPDIR)/mmc.Plo # am--include-marker
 include m4ri/$(DEPDIR)/mzd.Plo # am--include-marker
 include m4ri/$(DEPDIR)/mzp.Plo # am--include-marker
 include m4ri/$(DEPDIR)/ple.Plo # am--include-marker
@@ -1121,7 +1116,6 @@ distclean: distclean-recursive
 	-rm -f m4ri/$(DEPDIR)/graycode.Plo
 	-rm -f m4ri/$(DEPDIR)/io.Plo
 	-rm -f m4ri/$(DEPDIR)/misc.Plo
-	-rm -f m4ri/$(DEPDIR)/mmc.Plo
 	-rm -f m4ri/$(DEPDIR)/mzd.Plo
 	-rm -f m4ri/$(DEPDIR)/mzp.Plo
 	-rm -f m4ri/$(DEPDIR)/ple.Plo
@@ -1186,7 +1180,6 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f m4ri/$(DEPDIR)/graycode.Plo
 	-rm -f m4ri/$(DEPDIR)/io.Plo
 	-rm -f m4ri/$(DEPDIR)/misc.Plo
-	-rm -f m4ri/$(DEPDIR)/mmc.Plo
 	-rm -f m4ri/$(DEPDIR)/mzd.Plo
 	-rm -f m4ri/$(DEPDIR)/mzp.Plo
 	-rm -f m4ri/$(DEPDIR)/ple.Plo

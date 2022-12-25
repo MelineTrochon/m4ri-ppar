@@ -25,7 +25,6 @@
 
 #include "brilliantrussian.h"
 #include "graycode.h"
-#include "mmc.h"
 #include "ple_russian.h"
 #include "xor.h"
 

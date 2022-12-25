@@ -36,6 +36,7 @@
 /**
  * Crossover point for PLUQ factorization.
  */
+
 #define __M4RI_PLE_CUTOFF MIN(524288, __M4RI_CPU_L3_CACHE >> 3)
 
 /**
@@ -65,6 +66,7 @@
  *
  * \return Rank of A.
  */
+
 rci_t mzd_pluq(mzd_t *A, mzp_t *P, mzp_t *Q, const int cutoff);
 
 /**
@@ -97,6 +99,7 @@ rci_t mzd_pluq(mzd_t *A, mzp_t *P, mzp_t *Q, const int cutoff);
  *
  * \return Rank of A.
  */
+
 rci_t mzd_ple(mzd_t *A, mzp_t *P, mzp_t *Q, const int cutoff);
 
 /**
@@ -113,6 +116,7 @@ rci_t mzd_ple(mzd_t *A, mzp_t *P, mzp_t *Q, const int cutoff);
  *
  * \return Rank of A.
  */
+
 rci_t _mzd_pluq(mzd_t *A, mzp_t *P, mzp_t *Q, const int cutoff);
 
 /**
@@ -129,6 +133,7 @@ rci_t _mzd_pluq(mzd_t *A, mzp_t *P, mzp_t *Q, const int cutoff);
  *
  * \return Rank of A.
  */
+
 rci_t _mzd_ple(mzd_t *A, mzp_t *P, mzp_t *Qt, const int cutoff);
 
 /**
@@ -144,6 +149,7 @@ rci_t _mzd_ple(mzd_t *A, mzp_t *P, mzp_t *Qt, const int cutoff);
  *
  * \return Rank of A.
  */
+
 rci_t _mzd_pluq_naive(mzd_t *A, mzp_t *P, mzp_t *Q);
 
 /**
@@ -159,6 +165,7 @@ rci_t _mzd_pluq_naive(mzd_t *A, mzp_t *P, mzp_t *Q);
  *
  * \return Rank of A.
  */
+
 rci_t _mzd_ple_naive(mzd_t *A, mzp_t *P, mzp_t *Qt);
 
 #endif  // M4RI_PLUQ_H

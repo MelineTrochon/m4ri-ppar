@@ -84,7 +84,7 @@ m4ri/ple_russian.lo: m4ri/ple_russian.c m4ri/config.h m4ri/m4ri_config.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_stdio.h \
   m4ri/debug_dump.h m4ri/misc.h \
   /Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/mm_malloc.h \
-  m4ri/mzp.h m4ri/graycode.h m4ri/mmc.h m4ri/ple_russian.h m4ri/xor.h \
+  m4ri/mzp.h m4ri/graycode.h m4ri/ple_russian.h m4ri/xor.h \
   m4ri/xor_template.h m4ri/ple_russian_template.h
 
 m4ri/config.h:
@@ -266,8 +266,6 @@ m4ri/misc.h:
 m4ri/mzp.h:
 
 m4ri/graycode.h:
-
-m4ri/mmc.h:
 
 m4ri/ple_russian.h:
 

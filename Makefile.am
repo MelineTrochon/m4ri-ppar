@@ -19,7 +19,6 @@ libm4ri_la_SOURCES = \
 	m4ri/ple_russian.c \
 	m4ri/solve.c \
 	m4ri/echelonform.c \
-	m4ri/mmc.c \
 	m4ri/debug_dump.c \
 	m4ri/io.c \
 	m4ri/djb.c
@@ -45,7 +44,6 @@ pkgincludesub_HEADERS = m4ri/m4ri.h \
 	m4ri/echelonform.h \
 	m4ri/xor.h \
 	m4ri/xor_template.h \
-	m4ri/mmc.h \
 	m4ri/debug_dump.h \
 	m4ri/io.h \
 	m4ri/djb.h

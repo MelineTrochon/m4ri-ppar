@@ -1,0 +1,31 @@
+=========================================
+   m4ri 20200125: tests/test-suite.log
+=========================================
+
+# TOTAL: 15
+# PASS:  14
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  1
+# XPASS: 0
+# ERROR: 0
+
+.. contents:: :depth: 2
+
+FAIL: test_trsm
+===============
+
+mzd_trsm_upper_right: U nrows (1024) need to match B ncols (1802).
+upper_right:: m:   63 n:   63 offset:    0 ... passed
+upper_right:: m:   64 n:   64 offset:    0 ... passed
+upper_right:: m:   65 n:   65 offset:    0 ... passed
+upper_right:: m:   53 n:   53 offset:    0 ... passed
+upper_right:: m:   54 n:   54 offset:    0 ... passed
+upper_right:: m:   55 n:   55 offset:    0 ... passed
+upper_right:: m:   57 n:   10 offset:    0 ... passed
+upper_right:: m:   57 n:  150 offset:    0 ... passed
+upper_right:: m:   57 n:    3 offset:    0 ... passed
+upper_right:: m:   57 n:    4 offset:   64 ... passed
+upper_right:: m:   57 n:   80 offset:   64 ... passed
+upper_right:: m: 1577 n: 1802 offset:  128 ... FAIL test_trsm (exit status: 134)
+

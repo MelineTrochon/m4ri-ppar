@@ -27,7 +27,6 @@
 #include <png.h>
 #endif
 
-#include "mmc.h"
 #include "mzd.h"
 #include "parity.h"
 #include "transpose.h"
@@ -35,26 +34,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/**
- * \brief Cache of mzd_t containers
- */
-
-typedef struct mzd_t_cache {
-  mzd_t mzd[64];            /*!< cached matrices */
-  struct mzd_t_cache *prev; /*!< previous block */
-  struct mzd_t_cache *next; /*!< next block */
-  uint64_t used;            /*!< bitmasks which matrices in this block are used */
-  unsigned char padding[sizeof(mzd_t) - 2 * sizeof(struct mzd_t_cache *) -
-                        sizeof(uint64_t)]; /*!< alignment */
-#ifdef __GNUC__
-} mzd_t_cache_t __attribute__((__aligned__(64)));
-#else
-} mzd_t_cache_t;
-#endif
-
-#define __M4RI_MZD_T_CACHE_MAX 16
-static mzd_t_cache_t mzd_cache;
-static mzd_t_cache_t *current_cache = &mzd_cache;
 
 static int log2_floor(uint64_t v) {
   static uint64_t const b[]     = {0x2, 0xC, 0xF0, 0xFF00, 0xFFFF0000, 0xFFFFFFFF00000000};
@@ -76,69 +55,11 @@ static int log2_floor(uint64_t v) {
  */
 
 static mzd_t *mzd_t_malloc() {
-#if __M4RI_ENABLE_MZD_CACHE == 0
   return (mzd_t *)m4ri_mm_malloc(sizeof(mzd_t));
-#else
-  mzd_t *ret = NULL;
-  int i      = 0;
-
-  if (current_cache->used == (uint64_t)-1) {
-    mzd_t_cache_t *cache = &mzd_cache;
-    while (cache && cache->used == (uint64_t)-1) {
-      current_cache = cache;
-      cache         = cache->next;
-      i++;
-    }
-    if (!cache && i < __M4RI_MZD_T_CACHE_MAX) {
-      cache = (mzd_t_cache_t *)m4ri_mm_malloc_aligned(sizeof(mzd_t_cache_t), 64);
-      memset((char *)cache, 0, sizeof(mzd_t_cache_t));
-
-      cache->prev         = current_cache;
-      current_cache->next = cache;
-      current_cache       = cache;
-    } else if (!cache && i >= __M4RI_MZD_T_CACHE_MAX) {
-      /* We have reached the upper limit on the number of caches */
-      ret = (mzd_t *)m4ri_mm_malloc(sizeof(mzd_t));
-    } else {
-      current_cache = cache;
-    }
-  }
-  if (ret == NULL) {
-    int free_entry = log2_floor(~current_cache->used);
-    current_cache->used |= ((uint64_t)1 << free_entry);
-    ret = &current_cache->mzd[free_entry];
-  }
-  return ret;
-#endif  //__M4RI_ENABLE_MZD_CACHE
 }
 
 static void mzd_t_free(mzd_t *M) {
-#if __M4RI_ENABLE_MZD_CACHE == 0
   m4ri_mm_free(M);
-#else
-  int foundit          = 0;
-  mzd_t_cache_t *cache = &mzd_cache;
-  while (cache) {
-    size_t entry = M - cache->mzd;
-    if (entry < 64) {
-      cache->used &= ~((uint64_t)1 << entry);
-      if (cache->used == 0) {
-        if (cache == &mzd_cache) {
-          current_cache = cache;
-        } else {
-          if (cache == current_cache) { current_cache = cache->prev; }
-          cache->prev->next = cache->next;
-          if (cache->next) cache->next->prev = cache->prev;
-          m4ri_mm_free(cache);
-        }
-      }
-      foundit = 1;
-      break;
-    }
-    cache = cache->next;
-  }
-  if (!foundit) { m4ri_mm_free(M); }
-#endif  //__M4RI_ENABLE_MZD_CACHE
 }
 
 mzd_t *mzd_init(rci_t r, rci_t c) {
@@ -152,7 +73,7 @@ mzd_t *mzd_init(rci_t r, rci_t c) {
   A->flags         = (A->high_bitmask != m4ri_ffff) ? mzd_flag_nonzero_excess : 0;
   if (r && c) {
     size_t block_words = r * A->rowstride;
-    A->data = m4ri_mmc_calloc(block_words, sizeof(word));
+    A->data = m4ri_mm_calloc(block_words, sizeof(word));
   } else {
     A->data = NULL;
   }
@@ -182,7 +103,7 @@ mzd_t *mzd_init_window(mzd_t *M, const rci_t lowr, const rci_t lowc, const rci_t
 void mzd_free(mzd_t *A) {
   if (!mzd_is_windowed(A)) {
     size_t block_words = A->nrows * A->rowstride;
-    m4ri_mmc_free(A->data, block_words * sizeof(word));
+    m4ri_mm_free(A->data, block_words * sizeof(word));
   }
   mzd_t_free(A);
 }
