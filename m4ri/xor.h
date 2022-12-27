@@ -36,7 +36,6 @@
  * Compute c[i] += t1[i] for 0 <= i < wide
  *
  */
-
 static inline void _mzd_combine(word *c, word const *t1, wi_t wide_in) {
   wi_t wide = wide_in;
 

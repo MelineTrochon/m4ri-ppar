@@ -63,7 +63,6 @@ mzd_t *mzd_mul(mzd_t *C, mzd_t const *A, mzd_t const *B, int cutoff);
  * \param B Input matrix B
  * \param cutoff Minimal dimension for Strassen recursion.
  */
-
 mzd_t *mzd_addmul(mzd_t *C, mzd_t const *A, mzd_t const *B, int cutoff);
 
 /**
@@ -83,7 +82,6 @@ mzd_t *mzd_addmul(mzd_t *C, mzd_t const *A, mzd_t const *B, int cutoff);
  * strassen_window_multiply_c in Sage 3.0; For reference see
  * http://www.sagemath.org
  */
-
 mzd_t *_mzd_mul_even(mzd_t *C, mzd_t const *A, mzd_t const *B, int cutoff);
 
 /**
@@ -104,7 +102,6 @@ mzd_t *_mzd_mul_even(mzd_t *C, mzd_t const *A, mzd_t const *B, int cutoff);
  * strassen_window_multiply_c in Sage 3.0; For reference see
  * http://www.sagemath.org
  */
-
 mzd_t *_mzd_addmul_even(mzd_t *C, mzd_t const *A, mzd_t const *B, int cutoff);
 
 /**
@@ -121,7 +118,6 @@ mzd_t *_mzd_addmul_even(mzd_t *C, mzd_t const *A, mzd_t const *B, int cutoff);
  * \param cutoff Minimal dimension for Strassen recursion.
  *
  */
-
 mzd_t *_mzd_addmul(mzd_t *C, mzd_t const *A, mzd_t const *B, int cutoff);
 
 /**
