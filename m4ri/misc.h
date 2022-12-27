@@ -77,13 +77,11 @@ typedef int rci_t;
  * This type is used for the array of words that make up a row.
  * Beware, some functions expect this type to be a signed integer.
  */
-
 typedef int64_t wi_t;
 
 /**
  * \brief A word is the typical packed data structure to represent packed bits.
  */
-
 typedef uint64_t word;
 
 /**
@@ -95,7 +93,6 @@ typedef uint64_t word;
  *
  * \note This is a no-op. It's purpose it to track intention.
  */
-
 #define __M4RI_CONVERT_TO_INT(w) ((int)(w))
 
 /**
@@ -107,7 +104,6 @@ typedef uint64_t word;
  *
  * \note This is a no-op. It's purpose it to track intention.
  */
-
 #define __M4RI_CONVERT_TO_BIT(w) ((BIT)(w))
 
 /**
@@ -121,7 +117,6 @@ typedef uint64_t word;
  *
  * \note This is a no-op. It's purpose it to track intention.
  */
-
 #define __M4RI_CONVERT_TO_UINT64_T(w) (w)
 
 /**
@@ -131,25 +126,21 @@ typedef uint64_t word;
  *
  * \note This is a no-op. It's purpose it to track intention.
  */
-
 #define __M4RI_CONVERT_TO_WORD(i) ((word)(i))
 
 /**
  * \brief The number of bits in a word.
  */
-
 static int const m4ri_radix = 64;
 
 /**
  * \brief The number one as a word.
  */
-
 static word const m4ri_one = __M4RI_CONVERT_TO_WORD(1);
 
 /**
  * \brief A word with all bits set.
  */
-
 static word const m4ri_ffff = __M4RI_CONVERT_TO_WORD(-1);
 
 /**
@@ -158,7 +149,6 @@ static word const m4ri_ffff = __M4RI_CONVERT_TO_WORD(-1);
  * \param x Word
  * \param y Word
  */
-
 #ifndef MAX
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #endif
@@ -169,7 +159,6 @@ static word const m4ri_ffff = __M4RI_CONVERT_TO_WORD(-1);
  * \param x Word
  * \param y Word
  */
-
 #ifndef MIN
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #endif
@@ -177,7 +166,6 @@ static word const m4ri_ffff = __M4RI_CONVERT_TO_WORD(-1);
 /**
  *\brief Pretty for 1.
  */
-
 #ifndef TRUE
 #define TRUE 1
 #endif
@@ -185,7 +173,6 @@ static word const m4ri_ffff = __M4RI_CONVERT_TO_WORD(-1);
 /**
  *\brief Pretty for 0.
  */
-
 #ifndef FALSE
 #define FALSE 0
 #endif
@@ -610,7 +597,6 @@ void m4ri_fini(void);
  *
  * \todo Allow user to register calloc function.
  */
-
 static inline void *m4ri_mm_calloc(size_t count, size_t size) {
   void *newthing;
 #if __M4RI_USE_MM_MALLOC

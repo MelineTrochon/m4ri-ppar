@@ -34,7 +34,6 @@
  *
  * \note This function also works when dst == src.
  */
-
 static inline void _mzd_copy_transpose_64x64(word *dst, word const *src, wi_t rowstride_dst,
                                              wi_t rowstride_src) {
   /*
@@ -112,7 +111,6 @@ static inline void _mzd_copy_transpose_64x64(word *dst, word const *src, wi_t ro
  *
  * \note This function also works to transpose in-place.
  */
-
 static inline void _mzd_copy_transpose_64x64_2(word *RESTRICT dst1, word *RESTRICT dst2,
                                                word const *RESTRICT src1, word const *RESTRICT src2,
                                                wi_t rowstride_dst, wi_t rowstride_src) {
@@ -875,7 +873,11 @@ static void _mzd_transpose_notsmall(word *RESTRICT fwd, word const *RESTRICT fws
         word *RESTRICT fwd_right = fwd + offset; 
         rci_t maxsize_up = MAX(large_size, ncols);
         rci_t maxsize_down = MAX(nrows - large_size, ncols);
+
+        #pragma omp task shared(fwd_left)
         _mzd_transpose_notsmall(fwd_left, fws_up, rowstride_dst, rowstride_src, large_size, ncols, maxsize_up);
+        
+        #pragma omp task shared(fwd_right)
         _mzd_transpose_notsmall(fwd_right, fws_down, rowstride_dst, rowstride_src, nrows - large_size, ncols, maxsize_down);
       } else {
         word const *RESTRICT fws_left = fws; 
@@ -884,7 +886,11 @@ static void _mzd_transpose_notsmall(word *RESTRICT fwd, word const *RESTRICT fws
         word *RESTRICT fwd_down = fwd + large_size * rowstride_dst; 
         rci_t maxsize_left = MAX(nrows, large_size);
         rci_t maxsize_right = MAX(nrows, ncols - large_size);
+        
+        #pragma omp task shared(fwd_up)
         _mzd_transpose_notsmall(fwd_up, fws_left, rowstride_dst, rowstride_src, nrows, large_size, maxsize_left);
+        
+        #pragma omp task shared(fwd_down)
         _mzd_transpose_notsmall(fwd_down, fws_right, rowstride_dst, rowstride_src, nrows, ncols - large_size, maxsize_right);
     }
   }
@@ -898,7 +904,11 @@ static void _mzd_transpose(word *RESTRICT fwd, word const *RESTRICT fws, wi_t ro
   if (maxsize < 64) {  // super-fast path for very small matrices
     _mzd_copy_transpose_small(fwd, fws, rowstride_dst, rowstride_src, nrows, ncols, maxsize);
   } else {
-    _mzd_transpose_notsmall(fwd, fws, rowstride_dst, rowstride_src, nrows, ncols, maxsize);
+    #pragma omp parallel 
+    {
+      #pragma omp single
+      _mzd_transpose_notsmall(fwd, fws, rowstride_dst, rowstride_src, nrows, ncols, maxsize);
+    }
   }
 }
 
