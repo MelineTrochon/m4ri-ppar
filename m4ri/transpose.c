@@ -202,7 +202,6 @@ static word const transpose_mask[6] = {
  *
  * \return log2(j)
  */
-
 static inline int _mzd_transpose_Nxjx64(word *RESTRICT t, int n) {
   int j  = 1;
   int mi = 0;  // Index into the transpose_mask array.
@@ -254,7 +253,6 @@ static inline int _mzd_transpose_Nxjx64(word *RESTRICT t, int n) {
  *
  * \note This function also works to transpose in-place.
  */
-
 static inline void _mzd_copy_transpose_lt64x64(word *RESTRICT dst, word const *RESTRICT src,
                                                wi_t rowstride_dst, wi_t rowstride_src, int n) {
   // Preload the n input rows into level 1, using a minimum of cache lines (compact storage).
