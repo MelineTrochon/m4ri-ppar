@@ -51,7 +51,6 @@
  * processed as one block during the execution of a multiplication
  * algorithm.
  */
-
 #define __M4RI_MUL_BLOCKSIZE MIN(((int)sqrt((double)(4 * __M4RI_CPU_L3_CACHE))) / 2, 2048)
 
 
@@ -60,7 +59,6 @@
  *
  * The most fundamental data type in this library.
  */
-
 typedef struct mzd_t {
 
   rci_t nrows; /*!< Number of rows. */
@@ -70,7 +68,6 @@ typedef struct mzd_t {
   /**
    * Offset in words between rows.
    */
-
   wi_t rowstride;
 
   /**
@@ -84,7 +81,6 @@ typedef struct mzd_t {
    * 4: Is windowed, but owns the blocks allocations.
    * 5: Spans more than 1 block.
    */
-
   uint8_t flags;
 
   /* ensures sizeof(mzd_t) == 64 */
@@ -142,7 +138,6 @@ static uint8_t const mzd_flag_nonzero_excess = 0x2;
 /**
  * \brief flag for windowed matrix
  */
-
 static uint8_t const mzd_flag_windowed = 0x4;
 
 /**
@@ -177,7 +172,6 @@ static inline int mzd_is_dangerous_window(mzd_t const *M) {
  *
  * \return pointer to first word of the row.
  */
-
 static inline word *mzd_row(mzd_t *M, rci_t row) {
   return M->data + M->rowstride * row;
 }
@@ -195,7 +189,6 @@ static inline word const * mzd_row_const(mzd_t const *M, rci_t row) {
  * \param c Number of columns
  *
  */
-
 mzd_t *mzd_init(rci_t const r, rci_t const c);
 
 /**
@@ -203,7 +196,6 @@ mzd_t *mzd_init(rci_t const r, rci_t const c);
  *
  * \param A Matrix
  */
-
 void mzd_free(mzd_t *A);
 
 /**
@@ -226,7 +218,6 @@ void mzd_free(mzd_t *A);
  * \param highc End column (exclusive)
  *
  */
-
 mzd_t *mzd_init_window(mzd_t *M, rci_t const lowr, rci_t const lowc, rci_t const highr,
                        rci_t const highc);
 
@@ -235,7 +226,6 @@ mzd_t *mzd_init_window(mzd_t *M, rci_t const lowr, rci_t const lowc, rci_t const
  *
  * See mzd_init_window, but for constant M.
  */
-
 static inline mzd_t const *mzd_init_window_const(mzd_t const *M, rci_t const lowr, rci_t const lowc,
                                                  rci_t const highr, rci_t const highc) {
   return mzd_init_window((mzd_t *)M, lowr, lowc, highr, highc);
@@ -246,7 +236,6 @@ static inline mzd_t const *mzd_init_window_const(mzd_t const *M, rci_t const low
  *
  * \param A Matrix
  */
-
 #define mzd_free_window mzd_free
 
 /**
@@ -257,7 +246,6 @@ static inline mzd_t const *mzd_init_window_const(mzd_t const *M, rci_t const low
  * \param rowb Row index.
  * \param startblock Start swapping only in this block.
  */
-
 static inline void _mzd_row_swap(mzd_t *M, rci_t const rowa, rci_t const rowb,
                                  wi_t const startblock) {
   if ((rowa == rowb) || (startblock >= M->width)) { return; }
@@ -288,7 +276,6 @@ static inline void _mzd_row_swap(mzd_t *M, rci_t const rowa, rci_t const rowb,
  * \param rowa Row index.
  * \param rowb Row index.
  */
-
 static inline void mzd_row_swap(mzd_t *M, rci_t const rowa, rci_t const rowb) {
   _mzd_row_swap(M, rowa, rowb, 0);
 }
@@ -304,7 +291,6 @@ static inline void mzd_row_swap(mzd_t *M, rci_t const rowa, rci_t const rowb) {
  * \param A Source matrix.
  * \param j Source row index.
  */
-
 void mzd_copy_row(mzd_t *B, rci_t i, mzd_t const *A, rci_t j);
 
 
@@ -317,7 +303,6 @@ void mzd_copy_row(mzd_t *B, rci_t i, mzd_t const *A, rci_t j);
  * \param start_row Row index.
  * \param stop_row Row index (exclusive).
  */
-
 static inline void mzd_col_swap_in_rows(mzd_t *M, rci_t const cola, rci_t const colb,
                                         rci_t const start_row, rci_t const stop_row) {
   if (cola == colb) { return; }
@@ -432,7 +417,6 @@ static inline void mzd_col_swap(mzd_t *M, rci_t const cola, rci_t const colb) {
  * \note No bounds checks whatsoever are performed.
  *
  */
-
 static inline BIT mzd_read_bit(mzd_t const *M, rci_t const row, rci_t const col) {
   word const * truerow = mzd_row_const(M, row);
   return __M4RI_GET_BIT(truerow[col / m4ri_radix], col % m4ri_radix);
@@ -449,7 +433,6 @@ static inline BIT mzd_read_bit(mzd_t const *M, rci_t const row, rci_t const col)
  * \note No bounds checks whatsoever are performed.
  *
  */
-
 static inline void mzd_write_bit(mzd_t *M, rci_t const row, rci_t const col, BIT const value) {
     word * truerow = mzd_row(M, row);
   __M4RI_WRITE_BIT(truerow[col / m4ri_radix], col % m4ri_radix, value);
@@ -464,7 +447,6 @@ static inline void mzd_write_bit(mzd_t *M, rci_t const row, rci_t const col, BIT
  * \param n Number of bits (<= m4ri_radix);
  * \param values Word with values;
  */
-
 static inline void mzd_xor_bits(mzd_t *M, rci_t const x, rci_t const y, int const n,
                                 word values) {
   int const spot   = y % m4ri_radix;
@@ -484,7 +466,6 @@ static inline void mzd_xor_bits(mzd_t *M, rci_t const x, rci_t const y, int cons
  * \param n Number of bits (<= m4ri_radix);
  * \param values Word with values;
  */
-
 static inline void mzd_and_bits(mzd_t *M, rci_t const x, rci_t const y, int const n,
                                 word values) {
   /* This is the best way, since this will drop out once we inverse the bits in values: */
@@ -506,7 +487,6 @@ static inline void mzd_and_bits(mzd_t *M, rci_t const x, rci_t const y, int cons
  * \param y Starting column.
  * \param n Number of bits (0 < n <= m4ri_radix);
  */
-
 static inline void mzd_clear_bits(mzd_t *M, rci_t const x, rci_t const y, int const n) {
   assert(n > 0 && n <= m4ri_radix);
   word values      = m4ri_ffff >> (m4ri_radix - n);
@@ -529,7 +509,6 @@ static inline void mzd_clear_bits(mzd_t *M, rci_t const x, rci_t const y, int co
  *
  * \warning This function expects that there is at least one word worth of work.
  */
-
 static inline void mzd_row_add_offset(mzd_t *M, rci_t dstrow, rci_t srcrow, rci_t coloffset) {
   assert(dstrow < M->nrows && srcrow < M->nrows && coloffset < M->ncols);
   wi_t const startblock = coloffset / m4ri_radix;
@@ -566,7 +545,6 @@ static inline void mzd_row_add_offset(mzd_t *M, rci_t dstrow, rci_t srcrow, rci_
  *
  * \note this can be done much faster with mzd_combine.
  */
-
 void mzd_row_add(mzd_t *M, rci_t const sourcerow, rci_t const destrow);
 
 /**
@@ -598,7 +576,6 @@ mzd_t *mzd_mul_naive(mzd_t *C, mzd_t const *A, mzd_t const *B);
  * smarter to calculate bT yourself, and keep it, and then use the
  * function called _mzd_mul_naive
  */
-
 mzd_t *mzd_addmul_naive(mzd_t *C, mzd_t const *A, mzd_t const *B);
 
 /**
@@ -611,7 +588,6 @@ mzd_t *mzd_addmul_naive(mzd_t *C, mzd_t const *A, mzd_t const *B);
  * \param B Pre-transposed input matrix B.
  * \param clear Whether to clear C before accumulating AB
  */
-
 mzd_t *_mzd_mul_naive(mzd_t *C, mzd_t const *A, mzd_t const *B, int const clear);
 
 /**
@@ -630,7 +606,6 @@ mzd_t *_mzd_mul_va(mzd_t *C, mzd_t const *v, mzd_t const *A, int const clear);
  *
  * \param M Matrix
  */
-
 void mzd_randomize(mzd_t *M);
 
 /**
@@ -665,7 +640,6 @@ void mzd_randomize_custom(mzd_t *M, m4ri_random_callback rc, void *data);
  * \param M Matrix
  * \param value Either 0 or 1
  */
-
 void mzd_set_ui(mzd_t *M, unsigned int const value);
 
 /**
@@ -680,7 +654,6 @@ void mzd_set_ui(mzd_t *M, unsigned int const value);
  * \param startcol First column to consider for reduction.
  * \param full Gauss-Jordan style or upper triangular form only.
  */
-
 rci_t mzd_gauss_delayed(mzd_t *M, rci_t const startcol, int const full);
 
 /**

@@ -100,54 +100,92 @@ mzd_t *_mzd_mul_even(mzd_t *C, mzd_t const *A, mzd_t const *B, int cutoff) {
      * sequence of operations.
      */
 
-    /* change this to mzd_init(mmm, MAX(nnn,kkk)) to fix the todo below */
-    mzd_t *Wmk = mzd_init(mmm, kkk);
-    mzd_t *Wkn = mzd_init(kkk, nnn);
+    // /* change this to mzd_init(mmm, MAX(nnn,kkk)) to fix the todo below */
+    // mzd_t *Wmk = mzd_init(mmm, kkk);
+    // mzd_t *Wkn = mzd_init(kkk, nnn);
 
-    _mzd_add(Wkn, B22, B12);              /* Wkn = B22 + B12 */
-    _mzd_add(Wmk, A22, A12);              /* Wmk = A22 + A12 */
-    // #pragma omp task shared(C21)
-    _mzd_mul_even(C21, Wmk, Wkn, cutoff); /* C21 = Wmk * Wkn */
+    mzd_t *S = mzd_init(mmm, kkk);
+    mzd_t *T = mzd_init(kkk, nnn);
+    mzd_t *U1 = mzd_init(mmm, nnn);
+    mzd_t *U4 = mzd_init(mmm, nnn);
+    mzd_t *U5 = mzd_init(mmm, nnn);
 
-    _mzd_add(Wmk, A22, A21);              /* Wmk = A22 - A21 */
-    _mzd_add(Wkn, B22, B21);              /* Wkn = B22 - B21 */
-    // #pragma omp task shared(C22)
-    _mzd_mul_even(C22, Wmk, Wkn, cutoff); /* C22 = Wmk * Wkn */
+    _mzd_add(S, A11, A22);          /* 1  S = A11 - A22       */
+    _mzd_add(T, B22, B11);          /* 2  T = B22 - B11       */
+    #pragma   omp task
+    _mzd_mul_even(U1, S, T, cutoff); /* 3  U1 = S*T             */
 
-    _mzd_add(Wkn, Wkn, B12);              /* Wkn = Wkn + B12 */
-    _mzd_add(Wmk, Wmk, A12);              /* Wmk = Wmk + A12 */
-    // #pragma omp task shared(C11)
-    _mzd_mul_even(C11, Wmk, Wkn, cutoff); /* C11 = Wmk * Wkn */
+    _mzd_add(S, A21, A22);          /* 1  S = A11 - A22       */
+    #pragma   omp task
+    _mzd_mul_even(C21, S, B11, cutoff); /* 3  U1 = S*T             */
 
-    _mzd_add(Wmk, Wmk, A11);              /* Wmk = Wmk - A11 */
-    _mzd_mul_even(C12, Wmk, B12, cutoff); /* C12 = Wmk * B12 */
-    // #pragma omp taskwait
-    _mzd_add(C12, C12, C22);              /* C12 = C12 + C22 */
+    _mzd_add(T, B12, B22);          /* 2  T = B22 - B11       */
+    #pragma   omp task
+    _mzd_mul_even(C12, A11, T, cutoff); /* 3  U1 = S*T             */
 
-    /**
-     * \todo ideally we would use the same Wmk throughout the function
-     * but some called function doesn't like that and we end up with a
-     * wrong result if we use virtual Wmk matrices. Ideally, this should
-     * be fixed not worked around. The check whether the bug has been
-     * fixed, use only one Wmk and check if mzd_mul(4096, 3528,
-     * 4096, 2124) still returns the correct answer.
-     */
+    _mzd_add(T, B21, B11);          /* 2  T = B22 - B11       */
+    #pragma   omp task
+    _mzd_mul_even(U4, A22, T, cutoff); /* 3  U1 = S*T             */
 
-    mzd_free(Wmk);
-    Wmk = mzd_mul(NULL, A12, B21, cutoff); /*Wmk = A12 * B21 */
+    _mzd_add(S, A11, A12);          /* 1  S = A11 - A22       */
+    #pragma   omp task
+    _mzd_mul_even(U5, S, B22, cutoff); /* 3  U1 = S*T             */
 
-    _mzd_add(C11, C11, Wmk);              /* C11 = C11 + Wmk */
-    _mzd_add(C12, C11, C12);              /* C12 = C11 - C12 */
-    _mzd_add(C11, C21, C11);              /* C11 = C21 - C11 */
-    _mzd_add(Wkn, Wkn, B11);              /* Wkn = Wkn - B11 */
-    _mzd_mul_even(C21, A21, Wkn, cutoff); /* C21 = A21 * Wkn */
-    mzd_free(Wkn);
+    _mzd_add(S, A11, A21);          /* 1  S = A11 - A22       */
+    _mzd_add(T, B12, B11);          /* 2  T = B22 - B11       */
+    #pragma   omp task
+    _mzd_mul_even(C22, S, T, cutoff); /* 3  U1 = S*T             */
 
-    _mzd_add(C21, C11, C21);              /* C21 = C11 - C21 */
-    _mzd_add(C22, C22, C11);              /* C22 = C22 + C11 */
-    _mzd_mul_even(C11, A11, B11, cutoff); /* C11 = A11 * B11 */
+    _mzd_add(S, A12, A22);          /* 1  S = A11 - A22       */
+    _mzd_add(T, B22, B21);          /* 2  T = B22 - B11       */
+    _mzd_mul_even(C11, S, T, cutoff); /* 3  U1 = S*T             */
 
-    _mzd_add(C11, C11, Wmk); /* C11 = C11 + Wmk */
+    #pragma   omp taskwait
+    _mzd_add(C11, U1, C11);          /* 4  C22 = U + C22       */
+    _mzd_add(C11, U4, C11);          /* 4  C22 = U + C22       */
+    _mzd_add(C11, U5, C11);          /* 4  C22 = U + C22       */
+    _mzd_add(C22, U1, C22);             /* 20 C21 = C21 - U       */
+    _mzd_add(C22, C21, C22);             /* 20 C21 = C21 - U       */
+    _mzd_add(C22, C12, C22);             /* 20 C21 = C21 - U       */
+    _mzd_add(C12, U5, C12);          /* 5  C12 = U + C12       */
+    _mzd_add(C21, U4, C21);             /* 20 C21 = C21 - U       */
+    
+    // _mzd_add(Wkn, B22, B12);              /* Wkn = B22 + B12 */
+    // _mzd_add(Wmk, A22, A12);              /* Wmk = A22 + A12 */
+    // // #pragma omp task shared(C21)
+    // _mzd_mul_even(C21, Wmk, Wkn, cutoff); /* C21 = Wmk * Wkn */
+    // _mzd_add(Wmk, A22, A21);              /* Wmk = A22 - A21 */
+    // _mzd_add(Wkn, B22, B21);              /* Wkn = B22 - B21 */
+    // // #pragma omp task shared(C22)
+    // _mzd_mul_even(C22, Wmk, Wkn, cutoff); /* C22 = Wmk * Wkn */
+    // _mzd_add(Wkn, Wkn, B12);              /* Wkn = Wkn + B12 */
+    // _mzd_add(Wmk, Wmk, A12);              /* Wmk = Wmk + A12 */
+    // // #pragma omp task shared(C11)
+    // _mzd_mul_even(C11, Wmk, Wkn, cutoff); /* C11 = Wmk * Wkn */
+    // _mzd_add(Wmk, Wmk, A11);              /* Wmk = Wmk - A11 */
+    // _mzd_mul_even(C12, Wmk, B12, cutoff); /* C12 = Wmk * B12 */
+    // // #pragma omp taskwait
+    // _mzd_add(C12, C12, C22);              /* C12 = C12 + C22 */
+    // /**
+    //  * \todo ideally we would use the same Wmk throughout the function
+    //  * but some called function doesn't like that and we end up with a
+    //  * wrong result if we use virtual Wmk matrices. Ideally, this should
+    //  * be fixed not worked around. The check whether the bug has been
+    //  * fixed, use only one Wmk and check if mzd_mul(4096, 3528,
+    //  * 4096, 2124) still returns the correct answer.
+    //  */
+    // mzd_free(Wmk);
+    // Wmk = mzd_mul(NULL, A12, B21, cutoff); /*Wmk = A12 * B21 */
+    // _mzd_add(C11, C11, Wmk);              /* C11 = C11 + Wmk */
+    // _mzd_add(C12, C11, C12);              /* C12 = C11 - C12 */
+    // _mzd_add(C11, C21, C11);              /* C11 = C21 - C11 */
+    // _mzd_add(Wkn, Wkn, B11);              /* Wkn = Wkn - B11 */
+    // _mzd_mul_even(C21, A21, Wkn, cutoff); /* C21 = A21 * Wkn */
+    // mzd_free(Wkn);
+    // _mzd_add(C21, C11, C21);              /* C21 = C11 - C21 */
+    // _mzd_add(C22, C22, C11);              /* C22 = C22 + C11 */
+    // _mzd_mul_even(C11, A11, B11, cutoff); /* C11 = A11 * B11 */
+    // _mzd_add(C11, C11, Wmk); /* C11 = C11 + Wmk */
 
     /* clean up */
     mzd_free_window((mzd_t *)A11);
@@ -165,7 +203,13 @@ mzd_t *_mzd_mul_even(mzd_t *C, mzd_t const *A, mzd_t const *B, int cutoff) {
     mzd_free_window(C21);
     mzd_free_window(C22);
 
-    mzd_free(Wmk);
+    mzd_free(S);
+    mzd_free(T);
+    mzd_free(U1);
+    mzd_free(U4);
+    mzd_free(U5);
+
+    // mzd_free(Wmk);
   }
   /* deal with rest */
   nnn *= 2;
@@ -259,39 +303,88 @@ mzd_t *_mzd_sqr_even(mzd_t *C, mzd_t const *A, int cutoff) {
      * sequence of operations.
      */
 
-    mzd_t *Wmk;
-    mzd_t *Wkn = mzd_init(mmm, mmm);
+    // mzd_t *Wmk;
+    // mzd_t *Wkn = mzd_init(mmm, mmm);
 
-    _mzd_add(Wkn, A22, A12);         /* Wkn = A22 + A12 */
-    // #pragma omp task shared(C21)
-    _mzd_sqr_even(C21, Wkn, cutoff); /* C21 = Wkn^2 */
+    mzd_t *S = mzd_init(mmm, mmm);
+    mzd_t *T = mzd_init(mmm, mmm);
+    mzd_t *U1 = mzd_init(mmm, mmm);
+    mzd_t *U4 = mzd_init(mmm, mmm);
+    mzd_t *U5 = mzd_init(mmm, mmm);
 
-    _mzd_add(Wkn, A22, A21);         /* Wkn = A22 - A21 */
-    // #pragma omp task shared(C22)
-    _mzd_sqr_even(C22, Wkn, cutoff); /* C22 = Wkn^2 */
+    _mzd_add(S, A11, A22);
+    #pragma omp task
+    _mzd_sqr_even(U1, S, cutoff); /* 3  U1 = S*T             */
 
-    _mzd_add(Wkn, Wkn, A12);         /* Wkn = Wkn + A12 */
-    // #pragma omp task shared(C11)
-    _mzd_sqr_even(C11, Wkn, cutoff); /* C11 = Wkn^2 */
+    _mzd_add(S, A11, A12);          /* 1  S = A11 - A22       */
+    _mzd_add(T, A11, A21);          /* 2  T = B22 - B11       */
+    #pragma omp task
+    _mzd_mul_even(U4, A22, T, cutoff); /* 3  U1 = S*T             */
 
-    _mzd_add(Wkn, Wkn, A11);              /* Wkn = Wkn - A11 */
-    _mzd_mul_even(C12, Wkn, A12, cutoff); /* C12 = Wkn * A12 */
-    // #pragma omp taskwait
-    _mzd_add(C12, C12, C22);              /* C12 = C12 + C22 */
+    #pragma omp task
+    _mzd_mul_even(U5, S, A22, cutoff); /* 3  U1 = S*T             */
 
-    Wmk = mzd_mul(NULL, A12, A21, cutoff); /*Wmk = A12 * A21 */
+    if (A12 == A21) {
+      #pragma omp task
+      _mzd_sqr_even(C22, S, cutoff); /* 3  U1 = S*T             */
+    }
+    else {
+      #pragma omp task
+      _mzd_mul_even(C22, T, S, cutoff); /* 3  U1 = S*T             */
+    }
 
-    _mzd_add(C11, C11, Wmk);              /* C11 = C11 + Wmk */
-    _mzd_add(C12, C11, C12);              /* C12 = C11 - C12 */
-    _mzd_add(C11, C21, C11);              /* C11 = C21 - C11 */
-    _mzd_mul_even(C21, A21, Wkn, cutoff); /* C21 = A21 * Wkn */
-    mzd_free(Wkn);
+    _mzd_add(S, A21, A22);          /* 1  S = A11 - A22       */
+    _mzd_add(T, A12, A22);          /* 2  T = B22 - B11       */
+    #pragma omp task
+    _mzd_mul_even(C21, S, A11, cutoff); /* 3  U1 = S*T             */
 
-    _mzd_add(C21, C11, C21);         /* C21 = C11 - C21 */
-    _mzd_add(C22, C22, C11);         /* C22 = C22 + C11 */
-    _mzd_sqr_even(C11, A11, cutoff); /* C11 = A11^2 */
+    #pragma omp task
+    _mzd_mul_even(C12, A11, T, cutoff); /* 3  U1 = S*T             */
 
-    _mzd_add(C11, C11, Wmk); /* C11 = C11 + Wmk */
+        if (A12 == A21) {
+      #pragma omp task
+      _mzd_sqr_even(C11, S, cutoff); /* 3  U1 = S*T             */
+    }
+    else {
+      #pragma omp task
+      _mzd_mul_even(C11, T, S, cutoff); /* 3  U1 = S*T             */
+    }
+
+    #pragma omp taskwait
+    _mzd_add(C11, U1, C11);          /* 4  C22 = U + C22       */
+    _mzd_add(C11, U4, C11);          /* 4  C22 = U + C22       */
+    _mzd_add(C11, U5, C11);          /* 4  C22 = U + C22       */
+    _mzd_add(C22, U1, C22);             /* 20 C21 = C21 - U       */
+    _mzd_add(C22, C21, C22);             /* 20 C21 = C21 - U       */
+    _mzd_add(C22, C12, C22);             /* 20 C21 = C21 - U       */
+    _mzd_add(C12, U5, C12);          /* 5  C12 = U + C12       */
+    _mzd_add(C21, U4, C21);             /* 20 C21 = C21 - U       */
+
+    // _mzd_add(Wkn, A22, A12);         /* Wkn = A22 + A12 */
+    // // #pragma omp task shared(C21)
+    // _mzd_sqr_even(C21, Wkn, cutoff); /* C21 = Wkn^2 */
+    // _mzd_add(Wkn, A22, A21);         /* Wkn = A22 - A21 */
+    // // #pragma omp task shared(C22)
+    // _mzd_sqr_even(C22, Wkn, cutoff); /* C22 = Wkn^2 */
+    // _mzd_add(Wkn, Wkn, A12);         /* Wkn = Wkn + A12 */
+    // // #pragma omp task shared(C11)
+    // _mzd_sqr_even(C11, Wkn, cutoff); /* C11 = Wkn^2 */
+    // _mzd_add(Wkn, Wkn, A11);              /* Wkn = Wkn - A11 */
+    // _mzd_mul_even(C12, Wkn, A12, cutoff); /* C12 = Wkn * A12 */
+    // // #pragma omp taskwait
+    // _mzd_add(C12, C12, C22);              /* C12 = C12 + C22 */
+    // // changer appel fct general
+    // Wmk = (A12 == A21) ? _mzd_sqr_even(mzd_init(A->nrows, A21->ncols), A12, cutoff) : _mzd_mul_even(mzd_init(A->nrows, A21->ncols), A12, A21, cutoff);
+    // // Wmk = mzd_mul(NULL, A12, A21, cutoff); /*Wmk = A12 * A21 */
+    // _mzd_add(C11, C11, Wmk);              /* C11 = C11 + Wmk */
+    // _mzd_add(C12, C11, C12);              /* C12 = C11 - C12 */
+    // _mzd_add(C11, C21, C11);              /* C11 = C21 - C11 */
+    // _mzd_mul_even(C21, A21, Wkn, cutoff); /* C21 = A21 * Wkn */
+    // mzd_free(Wkn);
+    // _mzd_add(C21, C11, C21);         /* C21 = C11 - C21 */
+    // _mzd_add(C22, C22, C11);         /* C22 = C22 + C11 */
+    // _mzd_sqr_even(C11, A11, cutoff); /* C11 = A11^2 */
+    // _mzd_add(C11, C11, Wmk); /* C11 = C11 + Wmk */
 
     /* clean up */
     mzd_free_window((mzd_t *)A11);
@@ -304,7 +397,13 @@ mzd_t *_mzd_sqr_even(mzd_t *C, mzd_t const *A, int cutoff) {
     mzd_free_window(C21);
     mzd_free_window(C22);
 
-    mzd_free(Wmk);
+    // mzd_free(Wmk);
+    mzd_free(S);
+    mzd_free(T);
+    mzd_free(U1);
+    mzd_free(U4);
+    mzd_free(U5);
+    
   }
   /* deal with rest */
   mmm *= 2;
@@ -363,9 +462,9 @@ mzd_t *mzd_mul(mzd_t *C, mzd_t const *A, mzd_t const *B, int cutoff) {
     m4ri_die("mzd_mul: C (%d x %d) has wrong dimensions, expected (%d x %d)\n", C->nrows, C->ncols,
              A->nrows, B->ncols);
   }
-  // #pragma omp parallel
+  #pragma omp parallel
  {
-    // #pragma omp single
+    #pragma omp single
     {
       C = (A == B) ? _mzd_sqr_even(C, A, cutoff) : _mzd_mul_even(C, A, B, cutoff);
     }
@@ -444,39 +543,75 @@ mzd_t *_mzd_addmul_even(mzd_t *C, mzd_t const *A, mzd_t const *B, int cutoff) {
 
     mzd_t *S = mzd_init(mmm, kkk);
     mzd_t *T = mzd_init(kkk, nnn);
-    mzd_t *U = mzd_init(mmm, nnn);
+    mzd_t *U1 = mzd_init(mmm, nnn);
+    mzd_t *U2 = mzd_init(mmm, nnn);
+    mzd_t *U3 = mzd_init(mmm, nnn);
+    mzd_t *U4 = mzd_init(mmm, nnn);
+    mzd_t *U5 = mzd_init(mmm, nnn);
 
-    _mzd_add(S, A22, A21);          /* 1  S = A22 - A21       */
-    _mzd_add(T, B22, B21);          /* 2  T = B22 - B21       */
-    _mzd_mul_even(U, S, T, cutoff); /* 3  U = S*T             */
-    _mzd_add(C22, U, C22);          /* 4  C22 = U + C22       */
-    _mzd_add(C12, U, C12);          /* 5  C12 = U + C12       */
+    _mzd_add(S, A11, A22);          /* 1  S = A11 - A22       */
+    _mzd_add(T, B22, B11);          /* 2  T = B22 - B11       */
+    #pragma  omp task
+    _mzd_mul_even(U1, S, T, cutoff); /* 3  U1 = S*T             */
 
-    _mzd_mul_even(U, A12, B21, cutoff); /* 8  U = A12*B21         */
-    _mzd_add(C11, U, C11);              /* 9  C11 = U + C11       */
+    _mzd_add(S, A21, A22);          /* 1  S = A11 - A22       */
+    #pragma  omp task
+    _mzd_mul_even(U2, S, B11, cutoff); /* 3  U1 = S*T             */
 
-    // #pragma omp task shared(C11)
-    _mzd_addmul_even(C11, A11, B11, cutoff); /* 11 C11 = A11*B11 + C11 */
+    _mzd_add(T, B12, B22);          /* 2  T = B22 - B11       */
+    #pragma  omp task
+    _mzd_mul_even(U3, A11, T, cutoff); /* 3  U1 = S*T             */
 
-    _mzd_add(S, S, A12);               /* 6  S = S - A12         */
-    _mzd_add(T, T, B12);               /* 7  T = T - B12         */
-    _mzd_addmul_even(U, S, T, cutoff); /* 10 U = S*T + U         */
-    _mzd_add(C12, C12, U);             /* 15 C12 = U + C12       */
+    _mzd_add(T, B21, B11);          /* 2  T = B22 - B11       */
+    #pragma  omp task
+    _mzd_mul_even(U4, A22, T, cutoff); /* 3  U1 = S*T             */
 
-    _mzd_add(S, A11, S);                   /* 12 S = A11 - S         */
-    // #pragma omp task shared(C12)
-    _mzd_addmul_even(C12, S, B12, cutoff); /* 14 C12 = S*B12 + C12   */
+    _mzd_add(S, A11, A12);          /* 1  S = A11 - A22       */
+    #pragma  omp task
+    _mzd_mul_even(U5, S, B22, cutoff); /* 3  U1 = S*T             */
 
-    _mzd_add(T, B11, T);                   /* 13 T = B11 - T         */
-    // #pragma omp task shared(C21)
-    _mzd_addmul_even(C21, A21, T, cutoff); /* 16 C21 = A21*T + C21   */
+    _mzd_add(S, A11, A21);          /* 1  S = A11 - A22       */
+    _mzd_add(T, B12, B11);          /* 2  T = B22 - B11       */
+    #pragma  omp task
+    _mzd_addmul_even(C22, S, T, cutoff); /* 3  U1 = S*T             */
 
-    _mzd_add(S, A22, A12);             /* 17 S = A22 + A21       */
-    _mzd_add(T, B22, B12);             /* 18 T = B22 + B21       */
-    _mzd_addmul_even(U, S, T, cutoff); /* 19 U = U - S*T         */
-    // #pragma omp taskwait
-    _mzd_add(C21, C21, U);             /* 20 C21 = C21 - U       */
-    _mzd_add(C22, C22, U);             /* 21 C22 = C22 - U       */
+    _mzd_add(S, A12, A22);          /* 1  S = A11 - A22       */
+    _mzd_add(T, B22, B21);          /* 2  T = B22 - B11       */
+    _mzd_addmul_even(C11, S, T, cutoff); /* 3  U1 = S*T             */
+
+    #pragma  omp taskwait
+    _mzd_add(C11, U1, C11);          /* 4  C22 = U + C22       */
+    _mzd_add(C11, U4, C11);          /* 4  C22 = U + C22       */
+    _mzd_add(C11, U5, C11);          /* 4  C22 = U + C22       */
+    _mzd_add(C12, U3, C12);          /* 5  C12 = U + C12       */
+    _mzd_add(C12, U5, C12);          /* 5  C12 = U + C12       */
+    _mzd_add(C21, U2, C21);             /* 20 C21 = C21 - U       */
+    _mzd_add(C21, U4, C21);             /* 20 C21 = C21 - U       */
+    _mzd_add(C22, U1, C22);             /* 20 C21 = C21 - U       */
+    _mzd_add(C22, U2, C22);             /* 20 C21 = C21 - U       */
+    _mzd_add(C22, U3, C22);             /* 20 C21 = C21 - U       */
+
+    // _mzd_add(S, A22, A21);          /* 1  S = A22 - A21       */
+    // _mzd_add(T, B22, B21);          /* 2  T = B22 - B21       */
+    // _mzd_mul_even(U, S, T, cutoff); /* 3  U = S*T             */
+    // _mzd_add(C22, U, C22);          /* 4  C22 = U + C22       */
+    // _mzd_add(C12, U, C12);          /* 5  C12 = U + C12       */
+    // _mzd_mul_even(U, A12, B21, cutoff); /* 8  U = A12*B21         */
+    // _mzd_add(C11, U, C11);              /* 9  C11 = U + C11       */
+    // _mzd_addmul_even(C11, A11, B11, cutoff); /* 11 C11 = A11*B11 + C11 */
+    // _mzd_add(S, S, A12);               /* 6  S = S - A12         */
+    // _mzd_add(T, T, B12);               /* 7  T = T - B12         */
+    // _mzd_addmul_even(U, S, T, cutoff); /* 10 U = S*T + U         */
+    // _mzd_add(C12, C12, U);             /* 15 C12 = U + C12       */
+    // _mzd_add(S, A11, S);                   /* 12 S = A11 - S         */
+    // _mzd_addmul_even(C12, S, B12, cutoff); /* 14 C12 = S*B12 + C12   */
+    // _mzd_add(T, B11, T);                   /* 13 T = B11 - T         */
+    // _mzd_addmul_even(C21, A21, T, cutoff); /* 16 C21 = A21*T + C21   */
+    // _mzd_add(S, A22, A12);             /* 17 S = A22 + A21       */
+    // _mzd_add(T, B22, B12);             /* 18 T = B22 + B21       */
+    // _mzd_addmul_even(U, S, T, cutoff); /* 19 U = U - S*T         */
+    // _mzd_add(C21, C21, U);             /* 20 C21 = C21 - U       */
+    // _mzd_add(C22, C22, U);             /* 21 C22 = C22 - U       */
 
     /* clean up */
     mzd_free_window((mzd_t *)A11);
@@ -496,7 +631,11 @@ mzd_t *_mzd_addmul_even(mzd_t *C, mzd_t const *A, mzd_t const *B, int cutoff) {
 
     mzd_free(S);
     mzd_free(T);
-    mzd_free(U);
+    mzd_free(U1);
+    mzd_free(U2);
+    mzd_free(U3);
+    mzd_free(U4);
+    mzd_free(U5);
   }
   /* deal with rest */
   nnn *= 2;
@@ -596,36 +735,88 @@ mzd_t *_mzd_addsqr_even(mzd_t *C, mzd_t const *A, int cutoff) {
      * sequence of operations.
      */
 
+    // mzd_t *S = mzd_init(mmm, mmm);
+    // mzd_t *U = mzd_init(mmm, mmm);
+
     mzd_t *S = mzd_init(mmm, mmm);
-    mzd_t *U = mzd_init(mmm, mmm);
+    mzd_t *T = mzd_init(mmm, mmm);
+    mzd_t *U1 = mzd_init(mmm, mmm);
+    mzd_t *U2 = mzd_init(mmm, mmm);
+    mzd_t *U3 = mzd_init(mmm, mmm);
+    mzd_t *U4 = mzd_init(mmm, mmm);
+    mzd_t *U5 = mzd_init(mmm, mmm);
 
-    _mzd_add(S, A22, A21);       /* 1  S = A22 - A21       */
-    _mzd_sqr_even(U, S, cutoff); /* 3  U = S^2             */
-    _mzd_add(C22, U, C22);       /* 4  C22 = U + C22       */
-    _mzd_add(C12, U, C12);       /* 5  C12 = U + C12       */
+    _mzd_add(S, A11, A22);
+    #pragma omp task
+    _mzd_sqr_even(U1, S, cutoff); /* 3  U1 = S*T             */
 
-    _mzd_mul_even(U, A12, A21, cutoff); /* 8  U = A12*A21         */
-    _mzd_add(C11, U, C11);              /* 9  C11 = U + C11       */
+    _mzd_add(S, A11, A12);          /* 1  S = A11 - A22       */
+    _mzd_add(T, A11, A21);          /* 2  T = B22 - B11       */
+    #pragma omp task
+    _mzd_mul_even(U4, A22, T, cutoff); /* 3  U1 = S*T             */
 
-    // #pragma omp task shared(C11)
-    _mzd_addsqr_even(C11, A11, cutoff); /* 11 C11 = A11^2 + C11   */
+    #pragma omp task
+    _mzd_mul_even(U5, S, A22, cutoff); /* 3  U1 = S*T             */
 
-    _mzd_add(S, S, A12);            /* 6  S = S + A12         */
-    _mzd_addsqr_even(U, S, cutoff); /* 10 U = S^2 + U         */
-    _mzd_add(C12, C12, U);          /* 15 C12 = U + C12       */
+    if (A12 == A21) {
+      #pragma omp task
+      _mzd_addsqr_even(C22, S, cutoff); /* 3  U1 = S*T             */
+    }
+    else {
+      #pragma omp task
+      _mzd_addmul_even(C22, T, S, cutoff); /* 3  U1 = S*T             */
+    }
 
-    _mzd_add(S, A11, S);                   /* 12 S = A11 - S         */
-    // #pragma omp task shared(C12)
-    _mzd_addmul_even(C12, S, A12, cutoff); /* 14 C12 = S*B12 + C12   */
+    _mzd_add(S, A21, A22);          /* 1  S = A11 - A22       */
+    _mzd_add(T, A12, A22);          /* 2  T = B22 - B11       */
+    #pragma omp task
+    _mzd_addmul_even(U2, S, A11, cutoff); /* 3  U1 = S*T             */
 
-    // #pragma omp task shared(C21)
-    _mzd_addmul_even(C21, A21, S, cutoff); /* 16 C21 = A21*T + C21   */
+    #pragma omp task
+    _mzd_addmul_even(U3, A11, T, cutoff); /* 3  U1 = S*T             */
 
-    _mzd_add(S, A22, A12);          /* 17 S = A22 + A21       */
-    _mzd_addsqr_even(U, S, cutoff); /* 19 U = U - S^2         */
-    // #pragma omp taskwait
-    _mzd_add(C21, C21, U);          /* 20 C21 = C21 - U3      */
-    _mzd_add(C22, C22, U);          /* 21 C22 = C22 - U3      */
+        if (A12 == A21) {
+      #pragma omp task
+      _mzd_addsqr_even(C11, S, cutoff); /* 3  U1 = S*T             */
+    }
+    else {
+      #pragma omp task
+      _mzd_addmul_even(C11, T, S, cutoff); /* 3  U1 = S*T             */
+    }
+
+    #pragma  omp taskwait
+    _mzd_add(C11, U1, C11);          /* 4  C22 = U + C22       */
+    _mzd_add(C11, U4, C11);          /* 4  C22 = U + C22       */
+    _mzd_add(C11, U5, C11);          /* 4  C22 = U + C22       */
+    _mzd_add(C12, U3, C12);          /* 5  C12 = U + C12       */
+    _mzd_add(C12, U5, C12);          /* 5  C12 = U + C12       */
+    _mzd_add(C21, U2, C21);             /* 20 C21 = C21 - U       */
+    _mzd_add(C21, U4, C21);             /* 20 C21 = C21 - U       */
+    _mzd_add(C22, U1, C22);             /* 20 C21 = C21 - U       */
+    _mzd_add(C22, U2, C22);             /* 20 C21 = C21 - U       */
+    _mzd_add(C22, U3, C22);             /* 20 C21 = C21 - U       */
+
+    // _mzd_add(S, A22, A21);       /* 1  S = A22 - A21       */
+    // _mzd_sqr_even(U, S, cutoff); /* 3  U = S^2             */
+    // _mzd_add(C22, U, C22);       /* 4  C22 = U + C22       */
+    // _mzd_add(C12, U, C12);       /* 5  C12 = U + C12       */
+    // _mzd_mul_even(U, A12, A21, cutoff); /* 8  U = A12*A21         */
+    // _mzd_add(C11, U, C11);              /* 9  C11 = U + C11       */
+    // // #pragma omp task shared(C11)
+    // _mzd_addsqr_even(C11, A11, cutoff); /* 11 C11 = A11^2 + C11   */
+    // _mzd_add(S, S, A12);            /* 6  S = S + A12         */
+    // _mzd_addsqr_even(U, S, cutoff); /* 10 U = S^2 + U         */
+    // _mzd_add(C12, C12, U);          /* 15 C12 = U + C12       */
+    // _mzd_add(S, A11, S);                   /* 12 S = A11 - S         */
+    // // #pragma omp task shared(C12)
+    // _mzd_addmul_even(C12, S, A12, cutoff); /* 14 C12 = S*B12 + C12   */
+    // // #pragma omp task shared(C21)
+    // _mzd_addmul_even(C21, A21, S, cutoff); /* 16 C21 = A21*T + C21   */
+    // _mzd_add(S, A22, A12);          /* 17 S = A22 + A21       */
+    // _mzd_addsqr_even(U, S, cutoff); /* 19 U = U - S^2         */
+    // // #pragma omp taskwait
+    // _mzd_add(C21, C21, U);          /* 20 C21 = C21 - U3      */
+    // _mzd_add(C22, C22, U);          /* 21 C22 = C22 - U3      */
 
     /* clean up */
     mzd_free_window((mzd_t *)A11);
@@ -639,7 +830,13 @@ mzd_t *_mzd_addsqr_even(mzd_t *C, mzd_t const *A, int cutoff) {
     mzd_free_window(C22);
 
     mzd_free(S);
-    mzd_free(U);
+    mzd_free(T);
+    mzd_free(U1);
+    mzd_free(U2);
+    mzd_free(U3);
+    mzd_free(U4);
+    mzd_free(U5);
+    // mzd_free(U);
   }
   /* deal with rest */
   mmm *= 2;
@@ -710,9 +907,9 @@ mzd_t *mzd_addmul(mzd_t *C, mzd_t const *A, mzd_t const *B, int cutoff) {
     __M4RI_DD_MZD(C);
     return C;
   }
-  // #pragma omp parallel
+  #pragma  omp parallel
   {
-    // #pragma omp single
+    #pragma  omp single
     C = _mzd_addmul(C, A, B, cutoff);
   }
   __M4RI_DD_MZD(C);
