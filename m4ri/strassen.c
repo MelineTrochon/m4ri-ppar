@@ -341,7 +341,7 @@ mzd_t *_mzd_sqr_even(mzd_t *C, mzd_t const *A, int cutoff) {
     #pragma omp task
     _mzd_mul_even(C12, A11, T, cutoff); /* 3  U1 = S*T             */
 
-        if (A12 == A21) {
+    if (A12 == A21) {
       #pragma omp task
       _mzd_sqr_even(C11, S, cutoff); /* 3  U1 = S*T             */
     }
@@ -775,7 +775,7 @@ mzd_t *_mzd_addsqr_even(mzd_t *C, mzd_t const *A, int cutoff) {
     #pragma omp task
     _mzd_addmul_even(U3, A11, T, cutoff); /* 3  U1 = S*T             */
 
-        if (A12 == A21) {
+    if (A12 == A21) {
       #pragma omp task
       _mzd_addsqr_even(C11, S, cutoff); /* 3  U1 = S*T             */
     }
