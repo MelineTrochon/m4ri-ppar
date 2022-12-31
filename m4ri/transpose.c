@@ -73,6 +73,20 @@ static inline void _mzd_copy_transpose_64x64(word *dst, word const *src, wi_t ro
   int j = 32;
   j_rowstride_dst >>= 1;
   word *RESTRICT wk = dst;
+  word *RESTRICT temp = wk;
+  // word const *RESTRICT wks = src;
+  // word const *RESTRICT temps = wks;
+  // for (temp = dst; temp < end; temp += j_rowstride_dst + rowstride_dst * j) {
+  //   temps += j_rowstride_src + rowstride_src * j;
+  //   #pragma omp for
+  //   for (int k = 0; k < j; ++k) {
+  //     wk = temp + rowstride_dst * k;
+  //     wks = temps + rowstride_src * k;
+  //     word xor                = ((*wks >> j) ^ *(wks + j_rowstride_src)) & m;
+  //     *wk                     = *wks ^ (xor << j);
+  //     *(wk + j_rowstride_dst) = *(wks + j_rowstride_src) ^ xor;
+  //   }
+  // }
   for (word const *RESTRICT wks = src; wk < end; wk += j_rowstride_dst, wks += j_rowstride_src) {
     for (int k = 0; k < j; ++k, wk += rowstride_dst, wks += rowstride_src) {
       word xor                = ((*wks >> j) ^ *(wks + j_rowstride_src)) & m;
@@ -86,12 +100,15 @@ static inline void _mzd_copy_transpose_64x64(word *dst, word const *src, wi_t ro
   m ^= m << 16;
   for (j = 16; j != 0; j = j >> 1, m ^= m << j) {
     j_rowstride_dst >>= 1;
-    for (wk = dst; wk < end; wk += j_rowstride_dst) {
-      for (int k = 0; k < j; ++k, wk += rowstride_dst) {
+    for (temp = dst; temp < end; temp += j_rowstride_dst + rowstride_dst * j) {
+      #pragma omp for
+      for (int k = 0; k < j; ++k) {
+        wk = temp + rowstride_dst * k;
         word xor = ((*wk >> j) ^ *(wk + j_rowstride_dst)) & m;
         *wk ^= xor << j;
         *(wk + j_rowstride_dst) ^= xor;
       }
+
     }
   }
 }
@@ -122,6 +139,7 @@ static inline void _mzd_copy_transpose_64x64_2(word *RESTRICT dst1, word *RESTRI
   word *RESTRICT wk[2];
   word const *RESTRICT wks[2];
   word xor [2];
+  word *RESTRICT temp[2];
 
   j_rowstride_dst >>= 1;
   wk[0]  = dst1;
@@ -155,8 +173,24 @@ static inline void _mzd_copy_transpose_64x64_2(word *RESTRICT dst1, word *RESTRI
   for (j = 16; j != 0; j = j >> 1, m ^= m << j) {
 
     j_rowstride_dst >>= 1;
-    wk[0] = dst1;
-    wk[1] = dst2;
+    temp[0] = wk[0];
+    temp[1] = wk[1];
+
+    // for (temp[0] = dst1, temp[1] = dst2; temp[0] < end; temp[0] += j_rowstride_dst + rowstride_dst * j, temp[1] += j_rowstride_dst + rowstride_src * j) {
+
+    //   #pragma omp for
+    //   for (int k = 0; k < j; ++k) {
+    //     wk[0] = temp[0] + rowstride_dst * k;
+    //     wk[1] = temp[1] + rowstride_dst * k;
+    //     xor[0] = ((*wk[0] >> j) ^ *(wk[0] + j_rowstride_dst)) & m;
+    //     xor[1] = ((*wk[1] >> j) ^ *(wk[1] + j_rowstride_dst)) & m;
+    //     *wk[0] ^= xor[0] << j;
+    //     *wk[1] ^= xor[1] << j;
+    //     *(wk[0] + j_rowstride_dst) ^= xor[0];
+    //     *(wk[1] + j_rowstride_dst) ^= xor[1];
+    //   }
+
+    // }
 
     do {
 
@@ -760,7 +794,7 @@ void _mzd_transpose_base(word *RESTRICT fwd, word const *RESTRICT fws, wi_t rows
        *
        * --Carlo Wood
        */
-#if 1
+#if 0
       int js = ncols & nrows & 64;  // True if the total number of whole 64x64 matrices is odd.
       wi_t const rowstride_64_dst      = 64 * rowstride_dst;
       word *RESTRICT fwd_current       = fwd;
@@ -807,21 +841,21 @@ void _mzd_transpose_base(word *RESTRICT fwd, word const *RESTRICT fws, wi_t rows
       }
 #else
       // The same as the above, but without using _mzd_copy_transpose_64x64_2.
-      wi_t const rowstride_64_dst = 64 * DST->rowstride;
+      wi_t const rowstride_64_dst = 64 * rowstride_dst;
       rci_t const whole_64cols    = ncols / 64;
       assert(nrows >= 64);
       do {
         for (int j = 0; j < whole_64cols; ++j) {
-          _mzd_copy_transpose_64x64(fwd + j * rowstride_64_dst, fws + j, DST->rowstride,
-                                    A->rowstride);
+          _mzd_copy_transpose_64x64(fwd + j * rowstride_64_dst, fws + j, rowstride_dst,
+                                    rowstride_src);
         }
         nrows -= 64;
         if (ncols % 64) {
           _mzd_copy_transpose_64xlt64(fwd + whole_64cols * rowstride_64_dst, fws + whole_64cols,
-                                      DST->rowstride, A->rowstride, ncols % 64);
+                                      rowstride_dst, rowstride_src, ncols % 64);
         }
         fwd += 1;
-        fws += 64 * A->rowstride;
+        fws += 64 * rowstride_src;
       } while (nrows >= 64);
 #endif
     }
